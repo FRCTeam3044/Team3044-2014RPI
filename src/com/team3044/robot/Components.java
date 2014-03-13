@@ -119,7 +119,23 @@ public class Components {
     public static boolean truss = false;
     private static boolean oldTruss = false;
     public static boolean trussButton = false;
-
+    
+    public static boolean trusshp = false;
+    private static boolean oldtrusshp =false;
+    public static boolean trusshpbutton=false;
+    
+    public static boolean slowmovingshoot =false;
+    private static boolean oldslowmovingshoot=false;
+    public static boolean slowmovingshootbutton =false;
+    
+    public static boolean fastmovingshoot = false;
+    private static boolean oldfastmovingshoot =false;
+    public static boolean fastmovingshootbutton = false;
+    
+    public static boolean longdistanceshoot =false;
+    private static boolean oldlongdistanceshoot = false;
+    public static boolean longdistanceshootbutton = false;
+    
     public static boolean shooterdown = false;
     public static boolean shooterDownButton = false;
 
@@ -136,10 +152,7 @@ public class Components {
     //shooter
     public static boolean islimitshooteruptriggerd = false;
     public static boolean islimitshooterdowntriggerd = false;
-    public static double shootspeedone = .5;
-    public static double shootspeedtwo = .4;
-    public static double shootspeedthree = .2;
-    public static double shootdownspeed = -.1;
+   
     public static double potvalue;
     public static double shooterPotPosition;
     private boolean pickupuplimit;
@@ -200,17 +213,26 @@ public class Components {
         shootButton = GamePadshoot.getRawButton(1);
         passButton = GamePadshoot.getRawButton(2);
         trussButton = GamePadshoot.getRawButton(3);
-        shooterDownButton = GamePadshoot.getRawButton(5);
+        //shooterDownButton = GamePadshoot.getRawButton(5);
         singleSpeedButton = GamePadshoot.getRawButton(4);
+        trusshpbutton = GamePadshoot.getRawButton(6);
+        slowmovingshootbutton = GamePadshoot.getRawButton(8);
+        fastmovingshootbutton = GamePadshoot.getRawButton(7);
+        longdistanceshootbutton = GamePadshoot.getRawButton(5);
     }
 
     public void updateSensorVals() {
 
-        shoot = shootButton && oldShoot == false;//right bumper
+        shoot = shootButton && oldShoot == false;//A
         pass = passButton && oldPass == false;//B
         truss = trussButton && oldTruss == false;//X
+        trusshp = trusshpbutton && oldtrusshp ==false;//RB
         shooterdown = shooterDownButton;//leftbumper
+        longdistanceshoot = longdistanceshootbutton&& oldlongdistanceshoot==false;
         shootsinglespeed = singleSpeedButton && oldShootSingleSpeed == false;//Y
+        slowmovingshoot = slowmovingshootbutton && oldslowmovingshoot==false;//start
+        fastmovingshoot = fastmovingshootbutton && oldfastmovingshoot ==false;//back
+        
 
         potvalue = ShooterPot.getAverageVoltage();
         shooterPotPosition = ShooterPot.getAverageVoltage();
@@ -229,7 +251,11 @@ public class Components {
         oldShoot = shootButton;
         oldPass = passButton;
         oldTruss = trussButton;
+        oldtrusshp =trusshpbutton;
         oldShootSingleSpeed = singleSpeedButton;
+        oldslowmovingshoot = slowmovingshootbutton;
+        oldfastmovingshoot = fastmovingshootbutton;
+        oldlongdistanceshoot = longdistanceshootbutton;
 
     }
 

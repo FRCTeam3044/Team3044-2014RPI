@@ -20,14 +20,21 @@ public class Shooter {
     private boolean islimitshooteruptrigger;
     private boolean islimitshooterdowntrigger;
 
+
+
     //  private double shootspeedone = Components.shootspeedone;
     //private double shootspeedtwo = Components.shootspeedtwo;
     //  private double shootspeedthree = Components.shootspeedthree;
-    private final double shootdownspeed = Components.shootdownspeed * 12;
-    private final double trussspeed = Components.trussspeed * 12;
-    private final double passspeed = Components.passspeed * 12;
-    public double singlespeed = .1 * 12;
 
+    public static double shootdownspeed = -.1*12;
+    public static double trussspeed = .8*12;
+    public static double passspeed = .25*12;
+    private final double trusshpspeed = .9 *12;//get speeds
+    private final double slowmovingspeed = .7 * 12;
+    private final double fastmovingspeed = .6*12;
+    public double singlespeed = .1 * 12;
+    private double longdistancespeed = .86 *12;
+    
     //joey heres your speed that you wanted
     public double shooterspeed = .5;
 
@@ -35,11 +42,15 @@ public class Shooter {
     private final double shootpotdown = 1.65;
     // private double shootpotlow =2.4;
     // private double shootpotmiddle = 2.6;
-    public double shootpothigh = 3;
-    private double shootsinglepot = 3;
+    public double shootpothigh = 3.375;
+    private double shootsinglepot = 3.375;
     private double trusspothigh = 2.2;
+    private double trusshppothigh = 2.2;//get pot
     private double passpot = 3;
     private double shootpot;
+    private double slowmovingpot=3.375;//getpot
+    private double fastmovingpot=3.375;//get pot
+    private double longdistancepot=3.375;
 
     private int shootstate;
 
@@ -53,10 +64,10 @@ public class Shooter {
 
     public boolean tempbutton = false;
     public boolean templimit = true;
-
+    
     double time = 0.0;
     double oldTime = 0.0;
-
+    
     DriverStationLCD ds = DriverStationLCD.getInstance();
     DriverStation DS = DriverStation.getInstance();
 
@@ -162,6 +173,8 @@ public class Shooter {
 
         switch (shootstate) {
             case down:
+                tempbutton = Components.shootsinglespeed;
+                templimit = islimitshooterup();
 
                 if (Components.shootsinglespeed && islimitshooterup() && Components.DownPickupLimit.get()) {
                     try {
@@ -176,7 +189,18 @@ public class Shooter {
                     }
                     shootpothigh = shootsinglepot;
                     shootstate = movingup;
-                } else if (Components.truss == true && islimitshooterup() == true && Components.DownPickupLimit.get()) {
+                } else if (Components.trusshp == true && islimitshooterup() == true && Components.DownPickupLimit.get()) {
+                    try {
+                        Components.shootermotorleft.setX(trusshpspeed);
+                        Components.shootermotorleft2.setX(trusshpspeed);
+                        Components.shootermotorright.setX(-trusshpspeed);
+                        Components.shootermotorright2.setX(-trusshpspeed);
+                    } catch (CANTimeoutException ex) {
+                        ex.printStackTrace();
+                    }
+                    shootpothigh = trusshppothigh;
+                    shootstate = movingup;
+                }else if (Components.truss == true && islimitshooterup() == true && Components.DownPickupLimit.get()) {
                     try {
                         Components.shootermotorleft.setX(trussspeed);
                         Components.shootermotorleft2.setX(trussspeed);
@@ -198,7 +222,19 @@ public class Shooter {
                     }
                     shootpothigh = passpot;
                     shootstate = movingup;
-                } else if (Components.shoot == true && islimitshooterup() == true && Components.DownPickupLimit.get()) {
+                } else if (Components.longdistanceshoot == true && islimitshooterup() == true && Components.DownPickupLimit.get()) {
+                    try {
+                        Components.shootermotorleft.setX(longdistancespeed);
+                        Components.shootermotorleft2.setX(longdistancespeed);
+                        Components.shootermotorright.setX(-longdistancespeed);
+                        Components.shootermotorright2.setX(-longdistancespeed);
+                    } catch (CANTimeoutException ex) {
+                        ex.printStackTrace();
+                    }
+                    shootpothigh = longdistancepot;
+                    shootstate = movingup;
+                }
+                else if (Components.shoot == true && islimitshooterup() == true && Components.DownPickupLimit.get()) {
                     try {
                         Components.shootermotorleft.setX(shooterspeed);
                         Components.shootermotorleft2.setX(shooterspeed);
@@ -209,9 +245,30 @@ public class Shooter {
                     }
                     shootpothigh = shootpot;
                     shootstate = movingup;
+                }else if (Components.slowmovingshoot == true && islimitshooterup() == true && Components.DownPickupLimit.get()) {
+                    try {
+                        Components.shootermotorleft.setX(slowmovingspeed);
+                        Components.shootermotorleft2.setX(slowmovingspeed);
+                        Components.shootermotorright.setX(-slowmovingspeed);
+                        Components.shootermotorright2.setX(-slowmovingspeed);
+                    } catch (CANTimeoutException ex) {
+                        ex.printStackTrace();
+                    }
+                    slowmovingpot = shootpot;
+                    shootstate = movingup;
                 }
-                break;
+                else if (Components.fastmovingshoot == true && islimitshooterup() == true && Components.DownPickupLimit.get()) {
+                    try {
+                        Components.shootermotorleft.setX(fastmovingspeed);
+                        Components.shootermotorleft2.setX(fastmovingspeed);
+                        Components.shootermotorright.setX(-fastmovingspeed);
+                        Components.shootermotorright2.setX(-fastmovingspeed);
+                    } catch (CANTimeoutException ex) {
+                        ex.printStackTrace();
+                    }
+                    fastmovingpot = shootpot;
 
+                }
             case movingup:
                 if (islimitshooterup() == false || Components.potvalue >= shootpothigh) {
                     shootstate = stopped;
