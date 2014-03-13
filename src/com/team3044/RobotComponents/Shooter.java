@@ -26,9 +26,9 @@ public class Shooter {
     //private double shootspeedtwo = Components.shootspeedtwo;
     //  private double shootspeedthree = Components.shootspeedthree;
 
-    public static double shootdownspeed = -.1*12;
-    public static double trussspeed = .8*12;
-    public static double passspeed = .25*12;
+    private double shootdownspeed = -.1*12;
+    private double trussspeed = .8*12;
+    private double passspeed = .25*12;
     private final double trusshpspeed = .9 *12;//get speeds
     private final double slowmovingspeed = .7 * 12;
     private final double fastmovingspeed = .6*12;

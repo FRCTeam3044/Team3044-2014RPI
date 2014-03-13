@@ -67,10 +67,10 @@ public class Pickup {
             case STOPPED: {// Roller stopped
                 if (Components.rollerfoward) {
                     k = MOVING_FORWARD;
-                    Roller.set(-1/*1*/);
+                    Roller.set(1);
                 } else if (Components.rollerreverse) {
                     k = MOVING_BACKWARD;
-                    Roller.set(1/*-1*/);
+                    Roller.set(-1);
                 }
 
             }
@@ -131,6 +131,9 @@ public class Pickup {
                 if (Components.pickupdown) {
                     n = MOVE_DOWN;
                     PickArm.set(Relay.Value.kReverse);
+                }
+                if(!Components.UpPickupLimit.get()){
+                    n = STOPPED_MID;
                 }
 
             }

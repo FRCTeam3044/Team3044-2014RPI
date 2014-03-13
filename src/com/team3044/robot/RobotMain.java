@@ -102,8 +102,6 @@ public class RobotMain extends IterativeRobot {
     public void testPeriodic() {
         drive.DriveAuto();
 
-        System.out.println("Left drive encoder: " + String.valueOf(Components.encoderleftdrive.getDistance()));
-        System.out.println("Right Drive Encoder: " + String.valueOf(Components.encoderrightdrive.getDistance()));
 
         if (drive.hasTraveledSetDistance()) {
             drive.stop();
@@ -136,17 +134,19 @@ public class RobotMain extends IterativeRobot {
             default:
                 if (table.getDouble("ISHOT", 0) == 1) {
                     autoType = MOVE_THEN_SHOOT;
+                    SmartDashboard.putBoolean("Hot Zone", true);
                 }else{
                     autoType = SHOOT_THEN_MOVE;
+                    SmartDashboard.putBoolean("Hot Zone", false);
                 }
                 break;
             case MOVE_THEN_SHOOT:
-                System.out.println("Auto Hot Zone");
+                
                 this.autoMoveShootUltrasonicHotZone();
                 break;
 
             case SHOOT_THEN_MOVE:
-                System.out.println("Auto Not Hot");
+                
                 this.autoMoveShootUltrasonic();
                 break;
 
@@ -179,11 +179,11 @@ public class RobotMain extends IterativeRobot {
         teleopTime = 0;
 
         lcd.println(DriverStationLCD.Line.kUser1, 1, "Shooter Up: " + Components.UpShooterLimit.get());
-        lcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter Down: " + shooter.islimitshooterdown());
+        lcd.println(DriverStationLCD.Line.kUser2, 1, "Encoder Right: " + Components.encoderrightdrive.getDistance() + "       ");
         lcd.println(DriverStationLCD.Line.kUser3, 1, "Pickup Up: " + Components.UpPickupLimit.get() + "    ");
         lcd.println(DriverStationLCD.Line.kUser4, 1, "Pickup Down: " + Components.DownPickupLimit.get() + "     ");
         lcd.println(DriverStationLCD.Line.kUser5, 1, "Ultrasonic: " + Components.uSonicDist + "     ");
-        lcd.println(DriverStationLCD.Line.kUser6, 1, "Pot: " + Components.ShooterPot.getVoltage() + "      ");
+        lcd.println(DriverStationLCD.Line.kUser6, 1, "Encoder Left: " + Components.encoderleftdrive.getDistance() + "      ");
         lcd.updateLCD();
 
         switch (teleopState) {
@@ -293,7 +293,7 @@ public class RobotMain extends IterativeRobot {
                 autoIndex++;
                 break;
             case 1:
-                if (Components.uSonicDist < 10) {
+                if (ds.getMatchTime() > 2.5 && Components.uSonicDist < 10) {
                     System.out.println("Stop");
                     drive.stop();
                     Components.pickupdown = true;
@@ -344,12 +344,12 @@ public class RobotMain extends IterativeRobot {
     public void autoMoveShootUltrasonicHotZone() {
         switch (autoIndex) {
             case 0:
-                drive.setDistanceToTravel(500, 500, .4);
+                drive.setDistanceToTravel(5000, 5000, .4);
                 drive.startdriving(true);
                 autoIndex++;
                 break;
             case 1:
-                if (Components.uSonicDist < 10) {
+                if (ds.getMatchTime() > 2.5 && Components.uSonicDist < 10) {
                     System.out.println("Stop");
                     drive.stop();
                     Components.pickupdown = true;
