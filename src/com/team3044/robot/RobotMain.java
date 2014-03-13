@@ -60,7 +60,7 @@ public class RobotMain extends IterativeRobot {
     final int STANDARD_TELEOP = 1;
     int teleopState = STANDARD_TELEOP;
 
-    int autoType = 0;
+    int autoType = -1;
     int autoIndex = 0;
 
     double autoStartTime = 0;
@@ -118,7 +118,7 @@ public class RobotMain extends IterativeRobot {
         shooter.teleopInit();
 
         autoIndex = 0;
-        autoType = 0;
+        autoType = -1;
 
     }
 
@@ -130,23 +130,27 @@ public class RobotMain extends IterativeRobot {
         pickup.teleop();
         drive.DriveAuto();
         components.updateSensorVals();
-        this.autoMoveShootUltrasonic();
+        //this.autoMoveShootUltrasonic();
 
-        //if(table.getDouble("ISHOT", 0) == 1 && ds.getMatchTime() < 5){ 
-        //    autoType = SHOOT_THEN_MOVE;
-        //}
-        //
-        //autoLowGoal();
-        /*switch(autoType){
-         case MOVE_THEN_SHOOT:
-         autoMoveAndShoot();
-         break;
-            
-         case SHOOT_THEN_MOVE:
-         autoShootAndMove();
-         break;
-                
-         }*/
+        switch (autoType) {
+            default:
+                if (table.getDouble("ISHOT", 0) == 1) {
+                    autoType = MOVE_THEN_SHOOT;
+                }else{
+                    autoType = SHOOT_THEN_MOVE;
+                }
+                break;
+            case MOVE_THEN_SHOOT:
+                System.out.println("Auto Hot Zone");
+                this.autoMoveShootUltrasonicHotZone();
+                break;
+
+            case SHOOT_THEN_MOVE:
+                System.out.println("Auto Not Hot");
+                this.autoMoveShootUltrasonic();
+                break;
+
+        }
     }
 
     public void testInit() {
@@ -285,6 +289,62 @@ public class RobotMain extends IterativeRobot {
         switch (autoIndex) {
             case 0:
                 drive.setDistanceToTravel(500, 500, .25);
+                drive.startdriving(true);
+                autoIndex++;
+                break;
+            case 1:
+                if (Components.uSonicDist < 10) {
+                    System.out.println("Stop");
+                    drive.stop();
+                    Components.pickupdown = true;
+                    Components.rollerfoward = true;
+                    autoIndex++;
+                }
+                break;
+            case 2:
+                if (pickup.getPickarm() == pickup.STOPPED_DOWN) {
+                    Components.rollerfoward = false;
+                    Components.rollerstop = true;
+                    Components.pickupdown = false;
+                    autoIndex++;
+                }
+                break;
+            case 3:
+                if (ds.getMatchTime() > 5) {
+                    Components.rollerstop = false;
+                    Components.singleSpeedButton = true;
+                    autoIndex++;
+                }
+                break;
+            case 4:
+                if (shooter.getshooterstate() == shooter.stopped) {
+                    Components.singleSpeedButton = false;
+                    Components.shooterDownButton = true;
+                    autoIndex++;
+                }
+
+                break;
+
+            case 5:
+                if (shooter.getshooterstate() == shooter.down) {
+                    Components.pickuptop = true;
+                    Components.shooterDownButton = false;
+                    autoIndex++;
+                }
+                break;
+            case 6:
+                if (pickup.getPickarm() == pickup.STOPPED_UP) {
+                    Components.pickuptop = false;
+
+                }
+                break;
+        }
+    }
+
+    public void autoMoveShootUltrasonicHotZone() {
+        switch (autoIndex) {
+            case 0:
+                drive.setDistanceToTravel(500, 500, .4);
                 drive.startdriving(true);
                 autoIndex++;
                 break;

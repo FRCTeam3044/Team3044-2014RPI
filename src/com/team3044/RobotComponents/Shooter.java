@@ -20,8 +20,6 @@ public class Shooter {
     private boolean islimitshooteruptrigger;
     private boolean islimitshooterdowntrigger;
 
-
-
     //  private double shootspeedone = Components.shootspeedone;
     //private double shootspeedtwo = Components.shootspeedtwo;
     //  private double shootspeedthree = Components.shootspeedthree;
@@ -55,10 +53,10 @@ public class Shooter {
 
     public boolean tempbutton = false;
     public boolean templimit = true;
-    
+
     double time = 0.0;
     double oldTime = 0.0;
-    
+
     DriverStationLCD ds = DriverStationLCD.getInstance();
     DriverStation DS = DriverStation.getInstance();
 
@@ -164,8 +162,6 @@ public class Shooter {
 
         switch (shootstate) {
             case down:
-                tempbutton = Components.shootsinglespeed;
-                templimit = islimitshooterup();
 
                 if (Components.shootsinglespeed && islimitshooterup() && Components.DownPickupLimit.get()) {
                     try {
