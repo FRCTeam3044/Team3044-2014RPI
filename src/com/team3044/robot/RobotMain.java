@@ -60,12 +60,12 @@ public class RobotMain extends IterativeRobot {
     final int STANDARD_TELEOP = 1;
     int teleopState = STANDARD_TELEOP;
 
-    int autoType = -1;
+    int autoType = this.SHOOT_THEN_MOVE;
     int autoIndex = 0;
 
     double autoStartTime = 0;
     double time = 0;
-
+    double autoCounter = 0;
     double teleopTime = 0;
     double oldTeleopTime = 0;
 
@@ -102,7 +102,6 @@ public class RobotMain extends IterativeRobot {
     public void testPeriodic() {
         drive.DriveAuto();
 
-
         if (drive.hasTraveledSetDistance()) {
             drive.stop();
 
@@ -114,7 +113,7 @@ public class RobotMain extends IterativeRobot {
         drive.autoInit();
         pickup.teleopInit();
         shooter.teleopInit();
-
+        autoCounter = 0;
         autoIndex = 0;
         autoType = -1;
 
@@ -129,28 +128,13 @@ public class RobotMain extends IterativeRobot {
         drive.DriveAuto();
         components.updateSensorVals();
         //this.autoMoveShootUltrasonic();
+        dashboardUpdate();
+        autoCounter++;
+        SmartDashboard.putNumber("Auto Counter", autoCounter);
+        
+        this.autoMoveShootUltrasonic();
 
-        switch (autoType) {
-            default:
-                if (table.getDouble("ISHOT", 0) == 1) {
-                    autoType = MOVE_THEN_SHOOT;
-                    SmartDashboard.putBoolean("Hot Zone", true);
-                }else{
-                    autoType = SHOOT_THEN_MOVE;
-                    SmartDashboard.putBoolean("Hot Zone", false);
-                }
-                break;
-            case MOVE_THEN_SHOOT:
-                
-                this.autoMoveShootUltrasonicHotZone();
-                break;
-
-            case SHOOT_THEN_MOVE:
-                
-                this.autoMoveShootUltrasonic();
-                break;
-
-        }
+        
     }
 
     public void testInit() {
@@ -171,27 +155,33 @@ public class RobotMain extends IterativeRobot {
 
     }
 
+    public void dashboardUpdate() {
+        lcd.println(DriverStationLCD.Line.kUser1, 1, "Shooter Up: " + Components.UpShooterLimit.get());
+        lcd.println(DriverStationLCD.Line.kUser2, 1, "ShooterDown: " + Components.DownShooterLimit.get() + "       ");
+        lcd.println(DriverStationLCD.Line.kUser3, 1, "Pickup Up: " + Components.UpPickupLimit.get() + "    ");
+        lcd.println(DriverStationLCD.Line.kUser4, 1, "Pickup Down: " + Components.DownPickupLimit.get() + "     ");
+        lcd.println(DriverStationLCD.Line.kUser5, 1, "Ultrasonic: " + Components.uSonicDist + "     ");
+        lcd.println(DriverStationLCD.Line.kUser6, 1, "Shooter Pot: " + Components.ShooterPot.getAverageVoltage() + "      ");
+        lcd.updateLCD();
+        SmartDashboard.putNumber("Battery: ", ds.getBatteryVoltage());
+        SmartDashboard.putNumber("Ultrasonic", Components.uSonicDist);
+        SmartDashboard.putNumber("AutoState", autoIndex);
+
+    }
+
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
 
         teleopTime = 0;
-
-        lcd.println(DriverStationLCD.Line.kUser1, 1, "Shooter Up: " + Components.UpShooterLimit.get());
-        lcd.println(DriverStationLCD.Line.kUser2, 1, "Encoder Right: " + Components.encoderrightdrive.getDistance() + "       ");
-        lcd.println(DriverStationLCD.Line.kUser3, 1, "Pickup Up: " + Components.UpPickupLimit.get() + "    ");
-        lcd.println(DriverStationLCD.Line.kUser4, 1, "Pickup Down: " + Components.DownPickupLimit.get() + "     ");
-        lcd.println(DriverStationLCD.Line.kUser5, 1, "Ultrasonic: " + Components.uSonicDist + "     ");
-        lcd.println(DriverStationLCD.Line.kUser6, 1, "Encoder Left: " + Components.encoderleftdrive.getDistance() + "      ");
-        lcd.updateLCD();
-
+        dashboardUpdate();
         switch (teleopState) {
 
             case PRE_OPERATOR_MOVE:
 
-                Components.leftdriveY = -.75;
-                Components.rightdriveY = -.75;
+                Components.leftdriveY = -.25;
+                Components.rightdriveY = -.25;
                 drive.Drivemain();
                 if (Math.abs(Utilities.deadband(components.GamePaddrive.getRawAxis(2), .1)) > 0
                         || Math.abs(Utilities.deadband(components.GamePaddrive.getRawAxis(5), .1)) > 0) {
@@ -209,14 +199,7 @@ public class RobotMain extends IterativeRobot {
                 pickup.teleop();
                 shooter.teleop();
                 drive.Drivemain();
-                SmartDashboard.putNumber("Battery: ", ds.getBatteryVoltage());
-                /*SmartDashboard.putNumber("LEFT FRONT VOLTAGE", Components.shootermotorleft.getOutputVoltage());
-                 SmartDashboard.putNumber("RIGHT FRONT VOLTAGE", Components.shootermotorright.getOutputVoltage());
-                 SmartDashboard.putNumber("LEFT BACK VOLTAGE", Components.shootermotorleft2.getOutputVoltage());
-                 SmartDashboard.putNumber("RIGHT BACK VOLTAGE", Components.shootermotorright2.getOutputVoltage());
-                 */
-                System.out.println("Encoder Distance Left: " + Components.encoderleftdrive.getDistance());
-                System.out.println("Encoder Distance Right: " + Components.encoderrightdrive.getDistance());
+
                 break;
 
         }
@@ -293,7 +276,7 @@ public class RobotMain extends IterativeRobot {
                 autoIndex++;
                 break;
             case 1:
-                if (ds.getMatchTime() > 2.5 && Components.uSonicDist < 10) {
+                if ((ds.getMatchTime() > 2.5 && Components.encoderrightdrive.getDistance() > 171 && Components.uSonicDist < 11) || ds.getMatchTime() > 5.5) {
                     System.out.println("Stop");
                     drive.stop();
                     Components.pickupdown = true;
@@ -310,7 +293,7 @@ public class RobotMain extends IterativeRobot {
                 }
                 break;
             case 3:
-                if (ds.getMatchTime() > 5) {
+                if (ds.getMatchTime() > 7) {
                     Components.rollerstop = false;
                     Components.singleSpeedButton = true;
                     autoIndex++;
@@ -349,8 +332,8 @@ public class RobotMain extends IterativeRobot {
                 autoIndex++;
                 break;
             case 1:
-                if (ds.getMatchTime() > 2.5 && Components.uSonicDist < 10) {
-                    System.out.println("Stop");
+                if ((ds.getMatchTime() > 2.5 && Components.encoderrightdrive.getDistance() > 171 && Components.uSonicDist < 11) || ds.getMatchTime() > 5) {
+                    
                     drive.stop();
                     Components.pickupdown = true;
                     Components.rollerfoward = true;

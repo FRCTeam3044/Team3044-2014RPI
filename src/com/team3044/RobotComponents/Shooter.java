@@ -4,6 +4,7 @@ import com.team3044.robot.Components;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.DriverStationLCD;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  *
@@ -12,7 +13,7 @@ import edu.wpi.first.wpilibj.DriverStationLCD;
  * true signal
  *
  *
- * @author Joey
+ * @author Ally
  */
 public class Shooter {
 
@@ -38,7 +39,7 @@ public class Shooter {
     //joey heres your speed that you wanted
     public double shooterspeed = .5;
 
-    private double initialpot = 0;
+    //private double initialpot = 0;
     private final double shootpotdown = 1.65;
     // private double shootpotlow =2.4;
     // private double shootpotmiddle = 2.6;
@@ -89,7 +90,7 @@ public class Shooter {
         } catch (CANTimeoutException ex) {
             ex.printStackTrace();
         }
-        initialpot = Components.ShooterPot.getAverageVoltage();
+        //initialpot = Components.ShooterPot.getAverageVoltage();
         //shootpotdown +=initialpot;
         //shootpotlow+= initialpot;
         //shootpotmiddle+= initialpot;
@@ -271,8 +272,10 @@ public class Shooter {
                 }
             case movingup:
                 if (islimitshooterup() == false || Components.potvalue >= shootpothigh) {
+                    SmartDashboard.putNumber("Stopping Pot", Components.potvalue);
                     shootstate = stopped;
                     oldTime = DS.getMatchTime();
+                    
                     try {
                         Components.shootermotorleft.setX(0);
                         Components.shootermotorleft2.setX(0);
@@ -285,6 +288,8 @@ public class Shooter {
                     } catch (CANTimeoutException ex) {
                         ex.printStackTrace();
                     }
+                }else{
+                    SmartDashboard.putNumber("Moving Pot", Components.potvalue);
                 }
                 break;
 
@@ -321,6 +326,8 @@ public class Shooter {
                         ex.printStackTrace();
                     }
                     shootstate = down;
+                }else{
+                    SmartDashboard.putNumber("Moving Pot", Components.potvalue);
                 }
         }
     }

@@ -100,7 +100,7 @@ public class Components {
     public static boolean pickuptop = false;
     public static boolean pickupmiddle = false;
     public static boolean pickupstop = false;
-
+    private static double oldUltrasonicValue = 18.0;
     public static boolean driveStraight = false;
 
     public static double pickuppot;
@@ -154,7 +154,7 @@ public class Components {
     public static boolean islimitshooterdowntriggerd = false;
    
     public static double potvalue;
-    public static double shooterPotPosition;
+    //public static double shooterPotPosition;
     private boolean pickupuplimit;
     private boolean pickupdownlimit;
     private double leftencoderd;
@@ -165,6 +165,7 @@ public class Components {
     public void robotInit() {
         leftdrive = new Jaguar(1, 1);
         rightdrive = new Jaguar(1, 2);
+        Components.oldUltrasonicValue = (((Components.ultrasonic.getVoltage() * voltagescale) * .03281) / .716) - (.518 / .716);
         initCanJags();
     }
 
@@ -220,7 +221,8 @@ public class Components {
         fastmovingshootbutton = GamePadshoot.getRawButton(7);
         longdistanceshootbutton = GamePadshoot.getRawButton(5);
     }
-
+    public static double temp = 0.0;
+    
     public void updateSensorVals() {
 
         shoot = shootButton && oldShoot == false;//A
@@ -235,7 +237,7 @@ public class Components {
         
 
         potvalue = ShooterPot.getAverageVoltage();
-        shooterPotPosition = ShooterPot.getAverageVoltage();
+        //shooterPotPosition = ShooterPot.getAverageVoltage();
         islimitshooteruptriggerd = UpShooterLimit.get();
         islimitshooterdowntriggerd = DownShooterLimit.get();
         pickupuplimit = DownPickupLimit.get();
@@ -246,8 +248,11 @@ public class Components {
         
         
         
-        uSonicDist = (((Components.ultrasonic.getVoltage() * voltagescale) * .03281) / .716) - (.518 / .716);
-
+        temp = (((Components.ultrasonic.getVoltage() * voltagescale) * .03281) / .716) - (.518 / .716);
+        if((Math.abs(temp - Components.oldUltrasonicValue) < 1)){
+            uSonicDist = temp;
+        }
+        
         oldShoot = shootButton;
         oldPass = passButton;
         oldTruss = trussButton;
@@ -256,9 +261,10 @@ public class Components {
         oldslowmovingshoot = slowmovingshootbutton;
         oldfastmovingshoot = fastmovingshootbutton;
         oldlongdistanceshoot = longdistanceshootbutton;
+        oldUltrasonicValue = uSonicDist;
 
     }
-
+    
     public void updatedrivevals() {
         leftdriveY = -GamePaddrive.getRawAxis(2);
         rightdriveY = -GamePaddrive.getRawAxis(5);
