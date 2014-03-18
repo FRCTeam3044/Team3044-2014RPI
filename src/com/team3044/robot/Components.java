@@ -5,7 +5,7 @@
  */
 package com.team3044.robot;
 
-import com.team3044.network.Dashboard;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Joystick;
@@ -72,7 +72,7 @@ public class Components {
     //driver station 
     public DriverStationLCD ds = DriverStationLCD.getInstance();
     public DriverStation DS = DriverStation.getInstance();
-    public Dashboard dashboard = Dashboard.getInstance();
+
 
     Joystick GamePaddrive = new Joystick(1);//check with xbox controllers
     Joystick GamePadshoot = new Joystick(2);

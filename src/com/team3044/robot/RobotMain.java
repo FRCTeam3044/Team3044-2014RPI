@@ -9,9 +9,9 @@ package com.team3044.robot;
 import com.team3044.RobotComponents.Drive;
 import com.team3044.RobotComponents.Pickup;
 import com.team3044.RobotComponents.Shooter;
-import com.team3044.network.Camera;
+
 import com.team3044.network.NetTable;
-import com.team3044.vision.targets.Target;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStationLCD;
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -53,8 +53,6 @@ public class RobotMain extends IterativeRobot {
     double calculatedShootDistance = 0.0;
     double calculatedShootAngle = 0.0;
 
-    Target leftTarget;
-    Target rightTarget;
 
     final int PRE_OPERATOR_MOVE = 0;
     final int STANDARD_TELEOP = 1;

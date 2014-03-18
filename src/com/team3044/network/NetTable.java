@@ -6,7 +6,6 @@
 
 package com.team3044.network;
 
-import com.team3044.vision.targets.Rectangle;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import java.io.IOException;
 
@@ -73,15 +72,7 @@ public class NetTable {
         tag = tag.toUpperCase();
         return table.getString(tag);
     }
-    
-    public Rectangle getRectangle(int id){
-        Rectangle r = new Rectangle(0,0,0,0,id);
-	r.setX(getDouble(id + "TX"));
-	r.setY(getDouble(id + "TY"));
-	r.setWidth(getDouble(id + "WIDTH"));
-	r.setHeight(getDouble(id + "HEIGHT"));
-	return r;	
-    }
+
     
     public static NetTable getInstance(){
         if(network == null){
