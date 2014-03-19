@@ -15,7 +15,6 @@ import com.team3044.network.NetTable;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStationLCD;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -110,7 +109,7 @@ public class RobotMain extends IterativeRobot {
         drive.teleopInit();
         drive.autoInit();
         pickup.teleopInit();
-        shooter.teleopInit();
+        
         autoCounter = 0;
         autoIndex = 0;
         autoType = -1;
@@ -121,10 +120,11 @@ public class RobotMain extends IterativeRobot {
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
+        components.stepAuto();
         shooter.teleop();
         pickup.teleop();
         drive.DriveAuto();
-        components.updateSensorVals();
+       
         //this.autoMoveShootUltrasonic();
         dashboardUpdate();
         autoCounter++;
@@ -140,12 +140,12 @@ public class RobotMain extends IterativeRobot {
         drive.startdriving(true);
         pickup.teleopInit();
         drive.teleopInit();
-        shooter.teleopInit();
+        
     }
 
     public void teleopInit() {
         pickup.teleopInit();
-        shooter.teleopInit();
+        
         drive.teleopInit();
 
         Components.encoderleftdrive.reset();
@@ -190,10 +190,7 @@ public class RobotMain extends IterativeRobot {
                 break;
 
             case STANDARD_TELEOP:
-
-                components.upDateJoystickVals();
-                components.updateSensorVals();
-                components.updatedrivevals();
+                components.stepTeleop();
                 pickup.teleop();
                 shooter.teleop();
                 drive.Drivemain();
@@ -234,13 +231,13 @@ public class RobotMain extends IterativeRobot {
                 }
                 break;
             case 3:
-                if (shooter.getshooterstate() == shooter.movingup) {
+                if (shooter.getshooterstate() == shooter.MOVING_UP) {
                     Components.shootsinglespeed = false;
                 }
                 autoIndex++;
                 break;
             case 4:
-                if (shooter.getshooterstate() == shooter.down) {
+                if (shooter.getshooterstate() == shooter.DOWN) {
                     Components.rollerfoward = true;
                     autoIndex++;
                 }
@@ -298,7 +295,7 @@ public class RobotMain extends IterativeRobot {
                 }
                 break;
             case 4:
-                if (shooter.getshooterstate() == shooter.stopped) {
+                if (shooter.getshooterstate() == shooter.UP) {
                     Components.singleSpeedButton = false;
                     Components.shooterDownButton = true;
                     autoIndex++;
@@ -307,7 +304,7 @@ public class RobotMain extends IterativeRobot {
                 break;
 
             case 5:
-                if (shooter.getshooterstate() == shooter.down) {
+                if (shooter.getshooterstate() == shooter.DOWN) {
                     Components.pickuptop = true;
                     Components.shooterDownButton = false;
                     autoIndex++;
@@ -354,7 +351,7 @@ public class RobotMain extends IterativeRobot {
                 }
                 break;
             case 4:
-                if (shooter.getshooterstate() == shooter.stopped) {
+                if (shooter.getshooterstate() == shooter.UP) {
                     Components.singleSpeedButton = false;
                     Components.shooterDownButton = true;
                     autoIndex++;
@@ -363,7 +360,7 @@ public class RobotMain extends IterativeRobot {
                 break;
 
             case 5:
-                if (shooter.getshooterstate() == shooter.down) {
+                if (shooter.getshooterstate() == shooter.DOWN) {
                     Components.pickuptop = true;
                     Components.shooterDownButton = false;
                     autoIndex++;
@@ -402,7 +399,7 @@ public class RobotMain extends IterativeRobot {
                 }
                 break;
             case 3:
-                if (shooter.getshooterstate() == shooter.stopped) {
+                if (shooter.getshooterstate() == shooter.UP) {
                     Components.singleSpeedButton = false;
                     Components.shooterDownButton = true;
                     autoIndex++;
@@ -411,7 +408,7 @@ public class RobotMain extends IterativeRobot {
                 break;
 
             case 4:
-                if (shooter.getshooterstate() == shooter.down) {
+                if (shooter.getshooterstate() == shooter.DOWN) {
                     Components.pickuptop = true;
                     Components.shooterDownButton = false;
                     autoIndex++;

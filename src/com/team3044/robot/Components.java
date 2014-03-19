@@ -80,7 +80,6 @@ public class Components {
     public static double trussspeed = .8;
     public static double passspeed = .25;
 
-    //other
     public static AnalogChannel ultrasonic = new AnalogChannel(1, 2); // going on arduino?
 
     //GamepadDrive
@@ -120,18 +119,6 @@ public class Components {
     private static boolean oldTruss = false;
     public static boolean trussButton = false;
     
-    public static boolean trusshp = false;
-    private static boolean oldtrusshp =false;
-    public static boolean trusshpbutton=false;
-    
-    public static boolean slowmovingshoot =false;
-    private static boolean oldslowmovingshoot=false;
-    public static boolean slowmovingshootbutton =false;
-    
-    public static boolean fastmovingshoot = false;
-    private static boolean oldfastmovingshoot =false;
-    public static boolean fastmovingshootbutton = false;
-    
     public static boolean longdistanceshoot =false;
     private static boolean oldlongdistanceshoot = false;
     public static boolean longdistanceshootbutton = false;
@@ -142,23 +129,11 @@ public class Components {
     public static boolean shootsinglespeed = false;
     private static boolean oldShootSingleSpeed = false;
     public static boolean singleSpeedButton = false;
-    //drive- drive+shoot 2-pickup+camera servos
-    //rumble motors?
+
     private static final double voltagescale = (1024 / 5);
     
     public static double uSonicDist = 0;
-    
-    public static double shootmotorvalue;
-    //shooter
-    public static boolean islimitshooteruptriggerd = false;
-    public static boolean islimitshooterdowntriggerd = false;
-   
-    public static double potvalue;
-    //public static double shooterPotPosition;
-    private boolean pickupuplimit;
-    private boolean pickupdownlimit;
-    private double leftencoderd;
-    private double rightencoderd;
+
 
     public static double ultrasonicDistance = 0.0;
 
@@ -194,11 +169,22 @@ public class Components {
         }
     }
 
-    public void upDateJoystickVals() {
+    public void stepTeleop(){
+        updateJoystickVals();
+        updateDriveVals();
+        updateSensorVals();
+    }
+    
+    public void stepAuto(){
+        updateSensorVals();
+    }
+    
+    private void updateJoystickVals() {
             //drive? adssdf
         //button vals.
 
         //change with axis?
+        
         gamePadDriveTriggers = GamePaddrive.getRawAxis(3);
         rollerfoward = GamePaddrive.getRawButton(6);
         rollerreverse = GamePaddrive.getRawButton(5);
@@ -210,45 +196,28 @@ public class Components {
         pickupstop = GamePaddrive.getRawButton(3);//talk to minh
 
         driveStraight = GamePaddrive.getRawButton(3);
-        //Shooter Buttons
+        
         shootButton = GamePadshoot.getRawButton(1);
         passButton = GamePadshoot.getRawButton(2);
         trussButton = GamePadshoot.getRawButton(3);
-        //shooterDownButton = GamePadshoot.getRawButton(5);
+        shooterDownButton = GamePadshoot.getRawButton(5);
         singleSpeedButton = GamePadshoot.getRawButton(4);
-        trusshpbutton = GamePadshoot.getRawButton(6);
-        slowmovingshootbutton = GamePadshoot.getRawButton(8);
-        fastmovingshootbutton = GamePadshoot.getRawButton(7);
         longdistanceshootbutton = GamePadshoot.getRawButton(5);
     }
     public static double temp = 0.0;
     
-    public void updateSensorVals() {
+    private void updateSensorVals() {
 
         shoot = shootButton && oldShoot == false;//A
         pass = passButton && oldPass == false;//B
         truss = trussButton && oldTruss == false;//X
-        trusshp = trusshpbutton && oldtrusshp ==false;//RB
         shooterdown = shooterDownButton;//leftbumper
         longdistanceshoot = longdistanceshootbutton&& oldlongdistanceshoot==false;
         shootsinglespeed = singleSpeedButton && oldShootSingleSpeed == false;//Y
-        slowmovingshoot = slowmovingshootbutton && oldslowmovingshoot==false;//start
-        fastmovingshoot = fastmovingshootbutton && oldfastmovingshoot ==false;//back
-        
 
-        potvalue = ShooterPot.getAverageVoltage();
-        //shooterPotPosition = ShooterPot.getAverageVoltage();
-        islimitshooteruptriggerd = UpShooterLimit.get();
-        islimitshooterdowntriggerd = DownShooterLimit.get();
-        pickupuplimit = DownPickupLimit.get();
-        pickupdownlimit = UpPickupLimit.get();
-
-        leftencoderd = encoderleftdrive.getDistance();
-        rightencoderd = encoderrightdrive.getDistance();
-        
-        
         
         temp = (((Components.ultrasonic.getVoltage() * voltagescale) * .03281) / .716) - (.518 / .716);
+        
         if((Math.abs(temp - Components.oldUltrasonicValue) < 1)){
             uSonicDist = temp;
         }
@@ -256,39 +225,15 @@ public class Components {
         oldShoot = shootButton;
         oldPass = passButton;
         oldTruss = trussButton;
-        oldtrusshp =trusshpbutton;
         oldShootSingleSpeed = singleSpeedButton;
-        oldslowmovingshoot = slowmovingshootbutton;
-        oldfastmovingshoot = fastmovingshootbutton;
         oldlongdistanceshoot = longdistanceshootbutton;
         oldUltrasonicValue = uSonicDist;
 
     }
     
-    public void updatedrivevals() {
+    private void updateDriveVals() {
         leftdriveY = -GamePaddrive.getRawAxis(2);
         rightdriveY = -GamePaddrive.getRawAxis(5);
-    }
-    double oldPotVal = 0;
-
-    public void test() {
-        //testing limit switches
-        SmartDashboard.putBoolean("Limit up shooter ", islimitshooteruptriggerd);
-        SmartDashboard.putBoolean("Limit down shooter ", islimitshooterdowntriggerd);
-        SmartDashboard.putBoolean("Limit pickup up ", pickupuplimit);
-        SmartDashboard.putBoolean("Limit pickup down ", pickupdownlimit);
-
-        //pots
-        SmartDashboard.putNumber("Shooter pot ", potvalue);
-        SmartDashboard.putBoolean("Direction", oldPotVal >= potvalue);
-        SmartDashboard.putNumber("Pickup pot ", pickuppot);
-
-        //encoder
-        SmartDashboard.putNumber("Leftdrive encoder distance", leftencoderd);
-        SmartDashboard.putNumber("rightdrive encoder distance", rightencoderd);
-
-        oldPotVal = potvalue;
-
     }
 
 }
