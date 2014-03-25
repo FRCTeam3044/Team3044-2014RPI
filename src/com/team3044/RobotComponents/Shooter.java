@@ -16,14 +16,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * @author Ally
  */
 public class Shooter {
-    
+
     private final double shootDownSpeed = -.1 * 12;
     private final double trussSpeed = .8 * 12;
     private final double passSpeed = .25 * 12;
     private double singlespeed = .55 * 12;
     private final double longDistanceSpeed = .86 * 12;
     private final double normalShootSpeed = .55 * 12;
-    
+
     public double shootpothigh = 3.375;
     private double shootsinglepot = 3.55;
     private final double trussPot = 2.2;
@@ -33,7 +33,7 @@ public class Shooter {
 
     private double shootSpeed = singlespeed;
     private double targetUpPot = shootsinglepot;
-    
+
     private int shootstate = 0;
 
     public final int DOWN = 0;
@@ -46,13 +46,13 @@ public class Shooter {
 
     DriverStationLCD dsLCD = DriverStationLCD.getInstance();
     DriverStation DS = DriverStation.getInstance();
-    
+
     private final double DOWN_SHOOTER_POT_VALUE = 1.55; //Check this
 
     public void robotInit() {
         shootstate = DOWN;
     }
-    
+
     public void disabledInit() {
         try {
             Components.shootermotorleft.setX(0);
@@ -63,9 +63,17 @@ public class Shooter {
             ex.printStackTrace();
         }
     }
-    
-    public void init(){ 
-        //RESET VALUES
+
+    public void init() {
+        try {
+            Components.shootermotorleft.setX(0);
+            Components.shootermotorleft2.setX(0);
+            Components.shootermotorright.setX(0);
+            Components.shootermotorright2.setX(0);
+        } catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+        }
+
     }
 
     public void teleop() {
@@ -75,21 +83,20 @@ public class Shooter {
         shoot();
     }
 
-
     public void shoot() {
-        if(Components.shootsinglespeed){
+        if (Components.shootsinglespeed) {
             shootSpeed = singlespeed;
             targetUpPot = shootsinglepot;
-        }else if(Components.pass){
+        } else if (Components.pass) {
             shootSpeed = passSpeed;
             targetUpPot = passPot;
-        }else if(Components.truss){
+        } else if (Components.truss) {
             shootSpeed = trussSpeed;
             targetUpPot = trussPot;
-        }else if(Components.longdistanceshoot){
+        } else if (Components.longdistanceshoot) {
             shootSpeed = longDistanceSpeed;
             targetUpPot = longDistancePot;
-        }else if(Components.shoot){
+        } else if (Components.shoot) {
             shootSpeed = normalShootSpeed;
             targetUpPot = normalShootPot;
         }

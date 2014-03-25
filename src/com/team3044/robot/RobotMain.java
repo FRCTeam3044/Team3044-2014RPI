@@ -15,6 +15,7 @@ import com.team3044.network.NetTable;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStationLCD;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -24,18 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-/*
- --------------------------------------
- Allocated Analog inputs on ds:
- --------------------------------------
- Analog 1: SingleSpeed speed
- Analog 2: Top shooter pot value
- --------------------------------------
- Digital Inputs:
- --------------------------------------
- None
 
- */
 public class RobotMain extends IterativeRobot {
 
     private Utilities utils;
@@ -52,7 +42,8 @@ public class RobotMain extends IterativeRobot {
     double calculatedShootDistance = 0.0;
     double calculatedShootAngle = 0.0;
 
-
+    SendableChooser c = new SendableChooser();
+    
     final int PRE_OPERATOR_MOVE = 0;
     final int STANDARD_TELEOP = 1;
     int teleopState = STANDARD_TELEOP;
@@ -76,6 +67,7 @@ public class RobotMain extends IterativeRobot {
 
     public Components getComponents() {
         return components;
+        
     }
 
     /**
@@ -97,12 +89,7 @@ public class RobotMain extends IterativeRobot {
     }
 
     public void testPeriodic() {
-        drive.DriveAuto();
 
-        if (drive.hasTraveledSetDistance()) {
-            drive.stop();
-
-        }
     }
 
     public void autonomousInit() {
@@ -125,13 +112,13 @@ public class RobotMain extends IterativeRobot {
         pickup.teleop();
         drive.DriveAuto();
        
-        //this.autoMoveShootUltrasonic();
-        dashboardUpdate();
         autoCounter++;
         SmartDashboard.putNumber("Auto Counter", autoCounter);
-        
-        this.autoMoveShootUltrasonic();
-
+        if(table.getDouble("ISHOT",0) == 0){
+            this.autoMoveShootUltrasonic();
+        }else {
+            this.autoMoveShootUltrasonicHotZone();
+        }
         
     }
 
@@ -145,25 +132,11 @@ public class RobotMain extends IterativeRobot {
 
     public void teleopInit() {
         pickup.teleopInit();
-        
+        shooter.init();
         drive.teleopInit();
 
         Components.encoderleftdrive.reset();
         Components.encoderrightdrive.reset();
-
-    }
-
-    public void dashboardUpdate() {
-        lcd.println(DriverStationLCD.Line.kUser1, 1, "Shooter Up: " + Components.UpShooterLimit.get());
-        lcd.println(DriverStationLCD.Line.kUser2, 1, "ShooterDown: " + Components.DownShooterLimit.get() + "       ");
-        lcd.println(DriverStationLCD.Line.kUser3, 1, "Pickup Up: " + Components.UpPickupLimit.get() + "    ");
-        lcd.println(DriverStationLCD.Line.kUser4, 1, "Pickup Down: " + Components.DownPickupLimit.get() + "     ");
-        lcd.println(DriverStationLCD.Line.kUser5, 1, "Ultrasonic: " + Components.uSonicDist + "     ");
-        lcd.println(DriverStationLCD.Line.kUser6, 1, "Shooter Pot: " + Components.ShooterPot.getAverageVoltage() + "      ");
-        lcd.updateLCD();
-        SmartDashboard.putNumber("Battery: ", ds.getBatteryVoltage());
-        SmartDashboard.putNumber("Ultrasonic", Components.uSonicDist);
-        SmartDashboard.putNumber("AutoState", autoIndex);
 
     }
 
@@ -173,7 +146,6 @@ public class RobotMain extends IterativeRobot {
     public void teleopPeriodic() {
 
         teleopTime = 0;
-        dashboardUpdate();
         switch (teleopState) {
 
             case PRE_OPERATOR_MOVE:
@@ -262,16 +234,33 @@ public class RobotMain extends IterativeRobot {
 
         }
     }
-
-    public void autoMoveShootUltrasonic() {
+    
+    public void autoMove(){
         switch (autoIndex) {
             case 0:
-                drive.setDistanceToTravel(500, 500, .25);
+                drive.setDistanceToTravel(500, 500, .4);
                 drive.startdriving(true);
                 autoIndex++;
                 break;
             case 1:
-                if ((ds.getMatchTime() > 2.5 && Components.encoderrightdrive.getDistance() > 171 && Components.uSonicDist < 11) || ds.getMatchTime() > 5.5) {
+                if ((ds.getMatchTime() > 2.5 && Components.encoderrightdrive.getDistance() > 125 && Components.uSonicDist < 11) || ds.getMatchTime() > 5.5) {
+                    drive.stop();
+                    autoIndex++;
+                }
+                break;
+        }
+    }
+    
+
+    public void autoMoveShootUltrasonic() {
+        switch (autoIndex) {
+            case 0:
+                drive.setDistanceToTravel(500, 500, .4);
+                drive.startdriving(true);
+                autoIndex++;
+                break;
+            case 1:
+                if ((ds.getMatchTime() > 2.5 && Components.encoderrightdrive.getDistance() > 125 && Components.uSonicDist < 11) || ds.getMatchTime() > 5.5) {
                     System.out.println("Stop");
                     drive.stop();
                     Components.pickupdown = true;
@@ -318,6 +307,10 @@ public class RobotMain extends IterativeRobot {
                 break;
         }
     }
+    
+    public void autoDoNothing(){
+    
+    }
 
     public void autoMoveShootUltrasonicHotZone() {
         switch (autoIndex) {
@@ -327,7 +320,7 @@ public class RobotMain extends IterativeRobot {
                 autoIndex++;
                 break;
             case 1:
-                if ((ds.getMatchTime() > 2.5 && Components.encoderrightdrive.getDistance() > 171 && Components.uSonicDist < 11) || ds.getMatchTime() > 5) {
+                if ((ds.getMatchTime() > 2.5 && Components.encoderrightdrive.getDistance() > 125 && Components.uSonicDist < 11) || ds.getMatchTime() > 5) {
                     
                     drive.stop();
                     Components.pickupdown = true;
@@ -374,7 +367,7 @@ public class RobotMain extends IterativeRobot {
                 break;
         }
     }
-
+    
     public void autoShoot() {
         switch (autoIndex) {
             case 0:
