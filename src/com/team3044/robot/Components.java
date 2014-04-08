@@ -92,6 +92,8 @@ public class Components {
      public static boolean button5 = false;//left bumper(top not trigger)
      public static boolean button6 = false;//right bumper
      */
+    public static boolean pickupEmergency = false;
+    
     public static boolean rollerfoward = false;
     public static boolean rollerreverse = false;
     public static boolean rollerstop = false;
@@ -184,7 +186,7 @@ public class Components {
         //button vals.
 
         //change with axis?
-        
+        pickupEmergency = GamePaddrive.getRawButton(2);
         gamePadDriveTriggers = GamePaddrive.getRawAxis(3);
         rollerfoward = GamePaddrive.getRawButton(6);
         rollerreverse = GamePaddrive.getRawButton(5);
@@ -192,17 +194,17 @@ public class Components {
 
         pickuptop = GamePaddrive.getRawButton(4);
         pickupdown = GamePaddrive.getRawButton(1);
-        pickupmiddle = GamePaddrive.getRawButton(2);
+        //pickupmiddle = GamePaddrive.getRawButton(2);
         pickupstop = GamePaddrive.getRawButton(3);//talk to minh
 
         driveStraight = GamePaddrive.getRawButton(3);
         
-        shootButton = GamePadshoot.getRawButton(1);
+        shootButton = GamePadshoot.getRawButton(6);
         passButton = GamePadshoot.getRawButton(2);
         trussButton = GamePadshoot.getRawButton(3);
         shooterDownButton = GamePadshoot.getRawButton(5);
         singleSpeedButton = GamePadshoot.getRawButton(4);
-        longdistanceshootbutton = GamePadshoot.getRawButton(5);
+        longdistanceshootbutton = GamePadshoot.getRawButton(1);
     }
     public static double temp = 0.0;
     
@@ -218,9 +220,9 @@ public class Components {
         
         temp = (((Components.ultrasonic.getVoltage() * voltagescale) * .03281) / .716) - (.518 / .716);
         
-        if((Math.abs(temp - Components.oldUltrasonicValue) < 1)){
-            uSonicDist = temp;
-        }
+        
+        uSonicDist = temp;
+        
         
         oldShoot = shootButton;
         oldPass = passButton;

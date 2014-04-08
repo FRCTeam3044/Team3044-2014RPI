@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-
 public class RobotMain extends IterativeRobot {
 
     private Utilities utils;
@@ -42,15 +41,16 @@ public class RobotMain extends IterativeRobot {
     double calculatedShootDistance = 0.0;
     double calculatedShootAngle = 0.0;
 
-    SendableChooser c = new SendableChooser();
-    
     final int PRE_OPERATOR_MOVE = 0;
     final int STANDARD_TELEOP = 1;
     int teleopState = STANDARD_TELEOP;
-
+    final int DRIVE_NO_SHOOT = 3;
     int autoType = this.SHOOT_THEN_MOVE;
     int autoIndex = 0;
-
+    int mainAuto = 0;
+    final int HOT_ZONE_DETECTION = 1;
+    final int NOT_HOT_ZONE = 2;
+    final int DO_NOTHING = 3;
     double autoStartTime = 0;
     double time = 0;
     double autoCounter = 0;
@@ -67,7 +67,7 @@ public class RobotMain extends IterativeRobot {
 
     public Components getComponents() {
         return components;
-        
+
     }
 
     /**
@@ -89,45 +89,95 @@ public class RobotMain extends IterativeRobot {
     }
 
     public void testPeriodic() {
+        dsUpdate();
+        components.stepAuto();
+        if (Components.encoderrightdrive.getDistance() > 119) {
+            drive.stop();
+        }
+    }
 
+    public void disabledPeriodic() {
+        dsUpdate();
+        components.stepAuto();
     }
 
     public void autonomousInit() {
         drive.teleopInit();
         drive.autoInit();
         pickup.teleopInit();
-        
+        if (ds.getDigitalIn(1) && ds.getDigitalIn(2) != true) {
+            mainAuto = HOT_ZONE_DETECTION;
+        } else if (!ds.getDigitalIn(1) && ds.getDigitalIn(2)) {
+            mainAuto = this.NOT_HOT_ZONE;
+        } else if (!ds.getDigitalIn(1) && !ds.getDigitalIn(2)) {
+            mainAuto = this.DRIVE_NO_SHOOT;
+        }
         autoCounter = 0;
         autoIndex = 0;
         autoType = -1;
 
     }
 
+    public void dsUpdate() {
+        lcd.println(DriverStationLCD.Line.kUser1, 1, "Pickup Up: " + Components.UpPickupLimit.get());
+        lcd.println(DriverStationLCD.Line.kUser2, 1, "Pickup Down: " + Components.DownPickupLimit.get());
+        lcd.println(DriverStationLCD.Line.kUser3, 1, "Shooter Up: " + Components.UpShooterLimit.get());
+        lcd.println(DriverStationLCD.Line.kUser4, 1, "Shooter Down: " + Components.DownShooterLimit.get());
+        lcd.println(DriverStationLCD.Line.kUser5, 1, "Shooter Pot: " + Components.ShooterPot.getAverageVoltage());
+        lcd.println(DriverStationLCD.Line.kUser6, 1, "Shooter State: " + shooter.getshooterstate());
+        SmartDashboard.putBoolean("ISHOT", isHot);
+        SmartDashboard.putNumber("time", ds.getMatchTime());
+        SmartDashboard.putNumber("LEFT DRIVE ENCODER", Components.encoderleftdrive.getDistance());
+        SmartDashboard.putNumber("RIGHT DRIVE ENCODER", Components.encoderrightdrive.getDistance());
+        SmartDashboard.putNumber("Ultrasonic", Components.uSonicDist);
+        lcd.updateLCD();
+    }
+
     /**
      * This function is called periodically during autonomous
      */
+    boolean isHot = false;
+
     public void autonomousPeriodic() {
         components.stepAuto();
         shooter.teleop();
         pickup.teleop();
         drive.DriveAuto();
-       
+        dsUpdate();
         autoCounter++;
-        SmartDashboard.putNumber("Auto Counter", autoCounter);
-        if(table.getDouble("ISHOT",0) == 0){
-            this.autoMoveShootUltrasonic();
-        }else {
-            this.autoMoveShootUltrasonicHotZone();
+        /*switch(mainAuto){
+         case HOT_ZONE_DETECTION:*/
+        if (ds.getMatchTime() < .25) {
+            isHot = table.getDouble("ISHOT", 0) == 1;
+        } else {
+            if (ds.getDigitalIn(1)) {
+                this.autoMoveShootUltrasonic();
+            } else if (!ds.getDigitalIn(1)) {
+                if(isHot){
+                    this.autoMoveShootUltrasonicHotZone();
+                }else{
+                    this.autoMoveShootUltrasonic();
+                }
+            }
         }
-        
+
+        /*break;
+         case NOT_HOT_ZONE:*/
+        /*this.autoMoveShootUltrasonic();/*
+         break;
+         case DRIVE_NO_SHOOT:
+         this.autoMove();
+         break;
+                
+         }   */
     }
 
     public void testInit() {
-        drive.setDistanceToTravel(180, 180, .25);
+        drive.setDistanceToTravel(1800, 1800, .25);
         drive.startdriving(true);
         pickup.teleopInit();
         drive.teleopInit();
-        
+
     }
 
     public void teleopInit() {
@@ -144,7 +194,7 @@ public class RobotMain extends IterativeRobot {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-
+        dsUpdate();
         teleopTime = 0;
         switch (teleopState) {
 
@@ -234,37 +284,37 @@ public class RobotMain extends IterativeRobot {
 
         }
     }
-    
-    public void autoMove(){
+
+    public void autoMove() {
         switch (autoIndex) {
             case 0:
-                drive.setDistanceToTravel(500, 500, .4);
+                drive.setDistanceToTravel(500, 500, .2);
                 drive.startdriving(true);
                 autoIndex++;
                 break;
             case 1:
-                if ((ds.getMatchTime() > 2.5 && Components.encoderrightdrive.getDistance() > 125 && Components.uSonicDist < 11) || ds.getMatchTime() > 5.5) {
+                if ((Components.encoderrightdrive.getDistance() > 24) || ds.getMatchTime() > 5.5) {
                     drive.stop();
                     autoIndex++;
                 }
                 break;
         }
     }
-    
 
     public void autoMoveShootUltrasonic() {
         switch (autoIndex) {
             case 0:
-                drive.setDistanceToTravel(500, 500, .4);
+                drive.setDistanceToTravel(5000, 5000, .5);
                 drive.startdriving(true);
+                Components.rollerfoward = true;
                 autoIndex++;
                 break;
             case 1:
-                if ((ds.getMatchTime() > 2.5 && Components.encoderrightdrive.getDistance() > 125 && Components.uSonicDist < 11) || ds.getMatchTime() > 5.5) {
-                    System.out.println("Stop");
+                if (Components.encoderrightdrive.getDistance() > 120 || ds.getMatchTime() > 5.5) {
+
                     drive.stop();
                     Components.pickupdown = true;
-                    Components.rollerfoward = true;
+                    //Components.rollerfoward = true;
                     autoIndex++;
                 }
                 break;
@@ -285,8 +335,8 @@ public class RobotMain extends IterativeRobot {
                 break;
             case 4:
                 if (shooter.getshooterstate() == shooter.UP) {
-                    Components.singleSpeedButton = false;
-                    Components.shooterDownButton = true;
+                    Components.shootButton = false;
+                    Components.singleSpeedButton = true;
                     autoIndex++;
                 }
 
@@ -307,9 +357,9 @@ public class RobotMain extends IterativeRobot {
                 break;
         }
     }
-    
-    public void autoDoNothing(){
-    
+
+    public void autoDoNothing() {
+
     }
 
     public void autoMoveShootUltrasonicHotZone() {
@@ -317,14 +367,15 @@ public class RobotMain extends IterativeRobot {
             case 0:
                 drive.setDistanceToTravel(5000, 5000, .4);
                 drive.startdriving(true);
+                Components.rollerfoward = true;
                 autoIndex++;
                 break;
             case 1:
-                if ((ds.getMatchTime() > 2.5 && Components.encoderrightdrive.getDistance() > 125 && Components.uSonicDist < 11) || ds.getMatchTime() > 5) {
-                    
+                if (Components.encoderrightdrive.getDistance() > 120 || ds.getMatchTime() > 5.5) {
+
                     drive.stop();
                     Components.pickupdown = true;
-                    Components.rollerfoward = true;
+                    //Components.rollerfoward = true;
                     autoIndex++;
                 }
                 break;
@@ -337,7 +388,7 @@ public class RobotMain extends IterativeRobot {
                 }
                 break;
             case 3:
-                if (ds.getMatchTime() > 3) {
+                if (ds.getMatchTime() > 4.3) {
                     Components.rollerstop = false;
                     Components.singleSpeedButton = true;
                     autoIndex++;
@@ -345,8 +396,8 @@ public class RobotMain extends IterativeRobot {
                 break;
             case 4:
                 if (shooter.getshooterstate() == shooter.UP) {
-                    Components.singleSpeedButton = false;
-                    Components.shooterDownButton = true;
+                    Components.shootButton = false;
+                    Components.singleSpeedButton = true;
                     autoIndex++;
                 }
 
@@ -360,54 +411,6 @@ public class RobotMain extends IterativeRobot {
                 }
                 break;
             case 6:
-                if (pickup.getPickarm() == pickup.STOPPED_UP) {
-                    Components.pickuptop = false;
-
-                }
-                break;
-        }
-    }
-    
-    public void autoShoot() {
-        switch (autoIndex) {
-            case 0:
-                Components.pickupdown = true;
-                Components.rollerfoward = true;
-                autoIndex++;
-                break;
-
-            case 1:
-                if (pickup.getPickarm() == pickup.STOPPED_DOWN) {
-                    Components.rollerfoward = false;
-                    Components.rollerstop = true;
-                    Components.pickupdown = false;
-                    autoIndex++;
-                }
-                break;
-            case 2:
-                if (ds.getMatchTime() > 3) {
-                    Components.rollerstop = false;
-                    Components.singleSpeedButton = true;
-                    autoIndex++;
-                }
-                break;
-            case 3:
-                if (shooter.getshooterstate() == shooter.UP) {
-                    Components.singleSpeedButton = false;
-                    Components.shooterDownButton = true;
-                    autoIndex++;
-                }
-
-                break;
-
-            case 4:
-                if (shooter.getshooterstate() == shooter.DOWN) {
-                    Components.pickuptop = true;
-                    Components.shooterDownButton = false;
-                    autoIndex++;
-                }
-                break;
-            case 5:
                 if (pickup.getPickarm() == pickup.STOPPED_UP) {
                     Components.pickuptop = false;
 

@@ -36,6 +36,7 @@ public class Pickup {
     public final int MOVE_DOWN = 2;
     public final int STOPPED_UP = 3;
     public final int MOVE_UP = 4;
+    public final int MOVE_UP_INC = 5;
     public Pickup() {
        
     }
@@ -119,6 +120,8 @@ public class Pickup {
                 } else if (Components.pickuptop) {
                     n = STOPPED_MID;
                     Components.LiftingPickup.set(Relay.Value.kOff);
+                }else if(Components.pickupEmergency && Components.UpPickupLimit.get()){
+                    Components.LiftingPickup.set(Relay.Value.kForward);
                 }
 
             }
@@ -147,7 +150,6 @@ public class Pickup {
 
             }
             break;
-
         }
     }
 

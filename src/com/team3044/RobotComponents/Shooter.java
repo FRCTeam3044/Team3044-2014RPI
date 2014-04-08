@@ -18,18 +18,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Shooter {
 
     private final double shootDownSpeed = -.1 * 12;
-    private final double trussSpeed = .8 * 12;
-    private final double passSpeed = .25 * 12;
-    private double singlespeed = .55 * 12;
-    private final double longDistanceSpeed = .86 * 12;
-    private final double normalShootSpeed = .55 * 12;
+    private final double trussSpeed = .8 * 12; //Check 2
+    private final double passSpeed = .4 * 12; //Check 3
+    private double singlespeed = .55 * 12;// 4
+    private final double longDistanceSpeed = .8 * 12; //Needs Calibration 5
+    private final double normalShootSpeed = .55 * 12; //Needs Calibration 1
 
     public double shootpothigh = 3.375;
-    private double shootsinglepot = 3.55;
-    private final double trussPot = 2.2;
-    private final double passPot = 3;
-    private final double normalShootPot = 3.55;
-    private final double longDistancePot = 3.375;
+    private double shootsinglepot = 3.55;// 4
+    private final double trussPot = 2.2; //Check 2
+    private final double passPot = 3.5; //Check 3
+    private final double normalShootPot = 3.5; //Needs Calibration 1
+    private final double longDistancePot = 3.36; //Needs Calibration 5
 
     private double shootSpeed = singlespeed;
     private double targetUpPot = shootsinglepot;
@@ -84,19 +84,19 @@ public class Shooter {
     }
 
     public void shoot() {
-        if (Components.shootsinglespeed) {
+        if (Components.shootsinglespeed) { //Y
             shootSpeed = singlespeed;
             targetUpPot = shootsinglepot;
-        } else if (Components.pass) {
+        } else if (Components.pass) { //B
             shootSpeed = passSpeed;
             targetUpPot = passPot;
-        } else if (Components.truss) {
+        } else if (Components.truss) { //X
             shootSpeed = trussSpeed;
             targetUpPot = trussPot;
-        } else if (Components.longdistanceshoot) {
+        } else if (Components.longdistanceshoot) { //A
             shootSpeed = longDistanceSpeed;
             targetUpPot = longDistancePot;
-        } else if (Components.shoot) {
+        } else if (Components.shoot) { //RB
             shootSpeed = normalShootSpeed;
             targetUpPot = normalShootPot;
         }
