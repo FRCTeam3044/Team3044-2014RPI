@@ -5,7 +5,6 @@
  */
 package com.team3044.robot;
 
-
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Joystick;
@@ -73,12 +72,13 @@ public class Components {
     public DriverStationLCD ds = DriverStationLCD.getInstance();
     public DriverStation DS = DriverStation.getInstance();
 
-
     Joystick GamePaddrive = new Joystick(1);//check with xbox controllers
     Joystick GamePadshoot = new Joystick(2);
 
     public static double trussspeed = .8;
     public static double passspeed = .25;
+
+    public static boolean saftey = false;
 
     public static AnalogChannel ultrasonic = new AnalogChannel(1, 2); // going on arduino?
 
@@ -93,7 +93,7 @@ public class Components {
      public static boolean button6 = false;//right bumper
      */
     public static boolean pickupEmergency = false;
-    
+
     public static boolean rollerfoward = false;
     public static boolean rollerreverse = false;
     public static boolean rollerstop = false;
@@ -120,11 +120,11 @@ public class Components {
     public static boolean truss = false;
     private static boolean oldTruss = false;
     public static boolean trussButton = false;
-    
-    public static boolean longdistanceshoot =false;
+
+    public static boolean longdistanceshoot = false;
     private static boolean oldlongdistanceshoot = false;
     public static boolean longdistanceshootbutton = false;
-    
+
     public static boolean shooterdown = false;
     public static boolean shooterDownButton = false;
 
@@ -133,9 +133,8 @@ public class Components {
     public static boolean singleSpeedButton = false;
 
     private static final double voltagescale = (1024 / 5);
-    
-    public static double uSonicDist = 0;
 
+    public static double uSonicDist = 0;
 
     public static double ultrasonicDistance = 0.0;
 
@@ -171,16 +170,16 @@ public class Components {
         }
     }
 
-    public void stepTeleop(){
+    public void stepTeleop() {
         updateJoystickVals();
         updateDriveVals();
         updateSensorVals();
     }
-    
-    public void stepAuto(){
+
+    public void stepAuto() {
         updateSensorVals();
     }
-    
+
     private void updateJoystickVals() {
             //drive? adssdf
         //button vals.
@@ -198,7 +197,7 @@ public class Components {
         pickupstop = GamePaddrive.getRawButton(3);//talk to minh
 
         driveStraight = GamePaddrive.getRawButton(3);
-        
+
         shootButton = GamePadshoot.getRawButton(6);
         passButton = GamePadshoot.getRawButton(2);
         trussButton = GamePadshoot.getRawButton(3);
@@ -207,23 +206,21 @@ public class Components {
         longdistanceshootbutton = GamePadshoot.getRawButton(1);
     }
     public static double temp = 0.0;
-    
+
     private void updateSensorVals() {
 
+        saftey = this.DS.getDigitalIn(5);
         shoot = shootButton && oldShoot == false;//A
         pass = passButton && oldPass == false;//B
         truss = trussButton && oldTruss == false;//X
         shooterdown = shooterDownButton;//leftbumper
-        longdistanceshoot = longdistanceshootbutton&& oldlongdistanceshoot==false;
+        longdistanceshoot = longdistanceshootbutton && oldlongdistanceshoot == false;
         shootsinglespeed = singleSpeedButton && oldShootSingleSpeed == false;//Y
 
-        
         temp = (((Components.ultrasonic.getVoltage() * voltagescale) * .03281) / .716) - (.518 / .716);
-        
-        
+
         uSonicDist = temp;
-        
-        
+
         oldShoot = shootButton;
         oldPass = passButton;
         oldTruss = trussButton;
@@ -232,10 +229,15 @@ public class Components {
         oldUltrasonicValue = uSonicDist;
 
     }
-    
+
     private void updateDriveVals() {
-        leftdriveY = -GamePaddrive.getRawAxis(2);
-        rightdriveY = -GamePaddrive.getRawAxis(5);
+        if (!saftey) {
+            leftdriveY = -GamePaddrive.getRawAxis(2);
+            rightdriveY = -GamePaddrive.getRawAxis(5);
+        } else {
+            leftdriveY = -GamePaddrive.getRawAxis(2) * DS.getAnalogIn(3);
+            rightdriveY = -GamePaddrive.getRawAxis(5) * DS.getAnalogIn(3);
+        }
     }
 
 }

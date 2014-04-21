@@ -214,7 +214,9 @@ public class RobotMain extends IterativeRobot {
             case STANDARD_TELEOP:
                 components.stepTeleop();
                 pickup.teleop();
-                shooter.teleop();
+                if(!Components.saftey){
+                    shooter.teleop();
+                }
                 drive.Drivemain();
 
                 break;
